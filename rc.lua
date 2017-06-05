@@ -21,6 +21,7 @@ local lain          = require("lain")
 local freedesktop   = require("freedesktop")
 local hotkeys_popup = require("awful.hotkeys_popup").widget
 -- }}}
+--
 
 local switcher = require("awesome-switcher-preview")
 switcher.settings.preview_box = true                                 -- display preview-box
@@ -794,4 +795,12 @@ for s in screen do
         s.mybottomwibox.ontop = true
         s.mybottomwibox.visible = false
     end
+end
+
+-- Startup applications
+local startupApps = {"cerebro"}
+
+for _, app in ipairs(startupApps) do
+  awful.spawn("killall -9 " .. app)
+  awful.spawn(app)
 end
