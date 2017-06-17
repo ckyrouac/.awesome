@@ -263,14 +263,6 @@ globalkeys = awful.util.table.join(
       os.execute('xsecurelock')
 		end),
 
-    -- KeePass
-		awful.key({ altkey, }, 'k', function ()
-				local matcher = function (c)
-						return awful.rules.match(c, {class = 'KeePass'})
-				end
-				awful.client.run_or_raise('/usr/bin/mono /usr/lib/keepass/KeePass.exe', matcher)
-		end),
-
     -- Slack
 		awful.key({ altkey, }, 's', function ()
 				local matcher = function (c)
@@ -292,7 +284,7 @@ globalkeys = awful.util.table.join(
 				local matcher = function (c)
 						return awful.rules.match(c, {class = 'Google-chrome'})
 				end
-				awful.client.run_or_raise('google-chrome', matcher)
+				awful.client.run_or_raise('google-chrome-stable', matcher)
 		end),
 
     -- Logs
