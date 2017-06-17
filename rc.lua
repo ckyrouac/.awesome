@@ -10,6 +10,9 @@
 local awesome, client, screen, tag = awesome, client, screen, tag
 local ipairs, string, os, table, tostring, tonumber, type = ipairs, string, os, table, tostring, tonumber, type
 
+local_config = require("local")
+util = require("util")
+
 local gears         = require("gears")
 local awful         = require("awful")
                       require("awful.autofocus")
@@ -22,6 +25,14 @@ local freedesktop   = require("freedesktop")
 local hotkeys_popup = require("awful.hotkeys_popup").widget
 -- }}}
 --
+
+local function restart()
+    if local_config.restart then
+        local_config.restart()
+    else
+        awesome.restart()
+    end
+end
 
 local switcher = require("awesome-switcher-preview")
 switcher.settings.preview_box = true                                 -- display preview-box
@@ -81,8 +92,8 @@ run_once({ "urxvtd", "unclutter -root" })
 
 -- {{{ Variable definitions
 local chosen_theme = "holo"
-local modkey       = "Mod4"
-local altkey       = "Mod1"
+local modkey       = util.modkey
+local altkey       = util.altkey
 local terminal     = "urxvtc" or "xterm"
 local editor       = os.getenv("EDITOR") or "nano" or "vi"
 local gui_editor   = "gvim"
@@ -180,20 +191,12 @@ local theme_path = string.format("%s/.config/awesome/themes/%s/theme.lua", os.ge
 beautiful.init(theme_path)
 -- }}}
 
-function restart()
-  os.execute('killall -9 cerebro')
-  os.execute('killall -9 conky')
-  os.execute('killall -9 dropbox')
-  os.execute('killall -9 ssh-agent')
-  awesome.restart()
-end
-
 -- {{{ Menu
 local myawesomemenu = {
     { "hotkeys", function() return false, hotkeys_popup.show_help end },
     { "manual", terminal .. " -e man awesome" },
     { "edit config", string.format("%s -e %s %s", terminal, editor, awesome.conffile) },
-    { "restart", awesome.restart },
+    { "restart", restart },
     { "quit", function() awesome.quit() end }
 }
 awful.util.mymainmenu = freedesktop.menu.build({
@@ -336,26 +339,6 @@ globalkeys = awful.util.table.join(
 					 switcher.switch(-1, "Alt_L", "Tab", "ISO_Left_Tab")
 			 end),
 
-    -- Monitor toggles
-    awful.key({ altkey, "Shift" }, "F12", function ()
-      naughty.notify({ preset = naughty.config.presets.critical,
-                       title = "Switching to right monitor",
-                       text = "" })
-      awful.util.spawn("/home/chris/bin/toggle-monitors-right.sh")
-    end),
-    awful.key({ altkey, "Shift" }, "F10", function ()
-      naughty.notify({ preset = naughty.config.presets.critical,
-                       title = "Switching to left monitor",
-                       text = "" })
-      awful.util.spawn("/home/chris/bin/toggle-monitors-left.sh")
-    end),
-    awful.key({ altkey, "Shift" }, "F11", function ()
-      naughty.notify({ preset = naughty.config.presets.critical,
-                       title = "Switching to dual monitors",
-                       text = "" })
-      awful.util.spawn("/home/chris/bin/toggle-monitors-dual.sh")
-    end),
-
     -- Tag browsing
     awful.key({ modkey,           }, "Left",   awful.tag.viewprev,
               {description = "view previous", group = "tag"}),
@@ -438,7 +421,7 @@ globalkeys = awful.util.table.join(
     -- Standard program
     awful.key({ modkey,           }, "Return", function () awful.spawn(terminal) end,
               {description = "open a terminal", group = "launcher"}),
-    awful.key({ modkey, "Control" }, "r", awesome.restart,
+    awful.key({ modkey, "Control" }, "r", restart,
               {description = "reload awesome", group = "awesome"}),
     awful.key({ modkey, "Shift"   }, "q", awesome.quit,
               {description = "quit awesome", group = "awesome"}),
@@ -492,6 +475,10 @@ globalkeys = awful.util.table.join(
               {description = "lua execute prompt", group = "awesome"})
     --]]
 )
+
+if local_config.globalkeys then
+    globalkeys = awful.util.table.join(globalkeys, local_config.globalkeys)
+end
 
 clientkeys = awful.util.table.join(
     awful.key({ altkey, "Shift"   }, "m",      lain.util.magnify_client                         ),
